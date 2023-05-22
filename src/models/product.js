@@ -4,11 +4,11 @@ const productSchema = new mongoose.Schema(
     {
         name: { type: String, require: true },
         price: { type: Number, require: true },
-        country: { type: String },
+        countryMade: { type: String },
         status: { type: String, require: true },
-        manufacturer: { type: String },
+        brand: { type: String },
+        size: { type: String, require: true },
         image: { type: String },
-        guaranteeTime: { type: Number },
         description: { type: String },
     },
     {

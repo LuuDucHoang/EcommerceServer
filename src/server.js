@@ -1,4 +1,5 @@
 require('dotenv').config();
+const cors = require('cors');
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const { connection } = require('./config/database');
@@ -12,6 +13,7 @@ app.use(express.json()); // Used to parse JSON bodies
 app.use(express.urlencoded()); //Parse URL-encoded bodies
 
 // config file upload
+app.use(cors({ origin: process.env.HOS_FETCH }));
 app.use(fileUpload());
 app.use('/api', routerApi);
 
