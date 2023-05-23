@@ -1,26 +1,33 @@
 const { postCreateProductService, getProductListServices } = require('../services/productService');
+const Product = require('../models/product');
 module.exports = {
     postCreateProduct: async (req, res) => {
         const { name, price, status } = req.body;
         let message;
-        if (!name || !price || !status) {
-            message = 'nhập full thông tin';
-            return res.status(200).json({
+        if (price < 0) {
+            message = 'Giá không được âm';
+            return res.status(400).json({
                 EC: -1,
                 message,
             });
         }
-        if (price < 0) {
-            message = 'Giá không được âm';
+        try {
+            const test = await Product.find({ name });
+            if (test.length != 0) {
+                return res.status(400).json({
+                    EC: -1,
+                    message: 'Đã tồn tại mặt hàng',
+                });
+            }
+            const results = await Product.create({ ...req.body });
             return res.status(200).json({
-                EC: -1,
-                message,
+                message: null,
+                results,
             });
-        } else {
-            const results = await postCreateProductService(req.body);
-            return res.status(200).json({
-                EC: 0,
-                message: results,
+        } catch (error) {
+            return res.status(500).json({
+                EC: -1,
+                message: error,
             });
         }
     },

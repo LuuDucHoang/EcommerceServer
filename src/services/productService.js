@@ -6,7 +6,8 @@ module.exports = {
 
         try {
             const test = await Product.find({ name });
-            if (test) {
+
+            if (test.length != 0) {
                 return {
                     message: 'Đã tồn tại tên mặt hàng',
                     results: null,

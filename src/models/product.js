@@ -2,12 +2,12 @@ const mongoose = require('mongoose');
 const mongoose_delete = require('mongoose-delete');
 const productSchema = new mongoose.Schema(
     {
-        name: { type: String, require: true },
-        price: { type: Number, require: true },
+        name: { type: String, required: true },
+        price: { type: Number, required: true },
         countryMade: { type: String },
-        status: { type: String, require: true },
+        status: { type: String, required: true },
         brand: { type: String },
-        size: { type: String, require: true },
+        size: { type: String, required: true },
         image: { type: String },
         description: { type: String },
     },

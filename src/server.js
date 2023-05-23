@@ -2,6 +2,7 @@ require('dotenv').config();
 const cors = require('cors');
 const express = require('express');
 const fileUpload = require('express-fileupload');
+const cookieParser = require('cookie-parser');
 const { connection } = require('./config/database');
 const app = express();
 const routerApi = require('./routes/api');
@@ -13,6 +14,7 @@ app.use(express.json()); // Used to parse JSON bodies
 app.use(express.urlencoded()); //Parse URL-encoded bodies
 
 // config file upload
+app.use(cookieParser());
 app.use(cors({ origin: process.env.HOS_FETCH }));
 app.use(fileUpload());
 app.use('/api', routerApi);
