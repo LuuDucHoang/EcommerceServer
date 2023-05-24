@@ -4,8 +4,8 @@ var jwt = require('jsonwebtoken');
 const aqp = require('api-query-params');
 ///ádasdasd
 const { postCreateUsersService, getUserSignInServices } = require('../services/userService');
-const { use } = require('../routes/api');
 
+let refreshTokens = [];
 const accessTokenfc = (user) => {
     return jwt.sign(
         {
@@ -28,14 +28,19 @@ const refreshTokenfc = (user) => {
 };
 module.exports = {
     postCreateUser: async (req, res) => {
+        const { name, userName, password } = req.body;
         try {
-            const results = await postCreateUsersService(req.body);
-            return res.status(200).json(results);
+            const test = await User.find({ userName });
+            if (test.length > 0) {
+                return res.status(409).json('Tài khoản đã tồn tại');
+            }
+            const hashPassword = await bcrypt.hash(password, 10);
+            const results = await User.create({ userName, password: hashPassword, name });
+            if (results) {
+                return res.status(200).json(results);
+            }
         } catch (error) {
-            return res.status(500).json({
-                message: error,
-                results: null,
-            });
+            return res.status(500).json(error);
         }
     },
     getUserSignIn: async (req, res) => {
@@ -44,9 +49,9 @@ module.exports = {
             const user = await User.findOne({ userName });
 
             if (!user) {
-                return res.status(404).json('Tài khoản không tồn tại');
+                return res.status(401).json('Tài khoản không tồn tại');
             }
-            console.log(user.password);
+
             const checkPass = await bcrypt.compare(password, user.password);
             if (!checkPass) {
                 return res.status(404).json('Sai mật khảu');
@@ -55,7 +60,7 @@ module.exports = {
                 user.password = undefined;
                 const accessToken = accessTokenfc(user);
                 const refreshToken = refreshTokenfc(user);
-
+                refreshTokens.push(refreshToken);
                 res.cookie('refreshToken', refreshToken, {
                     httpOnly: 'true',
                     path: '/',
@@ -78,7 +83,28 @@ module.exports = {
         }
     },
     requestRefreshToken: async (req, res) => {
-        console.log(req.cookies.refreshToken);
-        return res.status(200).json(1);
+        const refreshToken = req.cookies.refreshToken;
+        if (!refreshToken) return res.status(401).json("You're not authenticated ");
+        if (!refreshTokens.includes(refreshToken)) return res.status(403).json('Refresh token is not valid');
+        jwt.verify(refreshToken, process.env.REFRESH_KEY, (err, user) => {
+            if (err) {
+                return res.status(500).json(err);
+            }
+            refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
+            const newAccessToken = accessTokenfc(user);
+            const newRefreshToken = refreshTokenfc(user);
+            refreshTokens.push(newRefreshToken);
+            res.cookie('refreshToken', newRefreshToken, {
+                httpOnly: 'true',
+                path: '/',
+                sameSite: 'strict',
+            });
+            return res.status(200).json({ accessToken: newAccessToken });
+        });
+    },
+    userLogout: async (req, res) => {
+        res.clearCookie('refreshToken');
+        refreshTokens = refreshTokens.filter((token) => token !== req.cookies.refreshToken);
+        return res.status(200).json('Log out!');
     },
 };
