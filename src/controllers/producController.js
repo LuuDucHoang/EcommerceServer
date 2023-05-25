@@ -3,10 +3,17 @@ const aqp = require('api-query-params');
 const Product = require('../models/product');
 module.exports = {
     postCreateProduct: async (req, res) => {
-        const { name, price, status } = req.body;
+        const { name, price, status, type } = req.body;
         let message;
         if (price < 0) {
             message = 'Giá không được âm';
+            return res.status(400).json({
+                EC: -1,
+                message,
+            });
+        }
+        if (!type) {
+            message = 'Vui lòng nhập loại hàng';
             return res.status(400).json({
                 EC: -1,
                 message,
@@ -58,6 +65,42 @@ module.exports = {
             }
         } catch (error) {
             console.log(error);
+        }
+    },
+    getDetailProduct: async (req, res) => {
+        const id = req.params.id;
+        try {
+            const results = await Product.findById(id);
+            return res.status(200).json({
+                EC: 0,
+                data: results,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                EC: -1,
+                message: error,
+            });
+        }
+    },
+    getSmilarProduct: async (req, res) => {
+        const type = req.params.type;
+        try {
+            let randomPage = Math.floor(Math.random() * 3);
+            if (randomPage === 0) {
+                randomPage++;
+            }
+            const results = await Product.find({ type: type })
+                .skip((randomPage - 1) * 5)
+                .limit(5);
+            return res.status(200).json({
+                EC: 0,
+                data: results,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                EC: -1,
+                message: error,
+            });
         }
     },
 };
