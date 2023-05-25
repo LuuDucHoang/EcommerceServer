@@ -34,7 +34,6 @@ module.exports = {
     },
     getProductList: async (req, res) => {
         const size = Object.keys(req.query).length;
-        console.log(size);
         try {
             if (size !== 0) {
                 const x = aqp(req.query);

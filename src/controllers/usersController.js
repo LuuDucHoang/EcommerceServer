@@ -13,7 +13,7 @@ const accessTokenfc = (user) => {
             admin: user.admin,
         },
         process.env.ACCESS_KEY,
-        { expiresIn: '3s' },
+        { expiresIn: '1h' },
     );
 };
 const refreshTokenfc = (user) => {
