@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
         age: { type: Number },
         image: { type: String },
         admin: { type: Boolean, default: false },
+        refreshToken: { type: String },
     },
     {
         timestamps: true,

@@ -1,4 +1,5 @@
 const { postCreateProductService, getProductListServices } = require('../services/productService');
+const aqp = require('api-query-params');
 const Product = require('../models/product');
 module.exports = {
     postCreateProduct: async (req, res) => {
@@ -32,10 +33,24 @@ module.exports = {
         }
     },
     getProductList: async (req, res) => {
-        const results = await getProductListServices();
-        return res.status(200).json({
-            EC: 0,
-            message: results,
-        });
+        const size = Object.keys(req.query).length;
+        console.log(size);
+        try {
+            if (size !== 0) {
+                const x = aqp(req.query);
+                delete x.filter.page;
+                const results = await Product.find({ name: { $regex: '.*' + x.filter.name + '.*' } }).limit(x.limit);
+                return res.send(results);
+            }
+            if (size === 0) {
+                const results = await getProductListServices();
+                return res.status(200).json({
+                    EC: 0,
+                    message: results,
+                });
+            }
+        } catch (error) {
+            console.log(error);
+        }
     },
 };

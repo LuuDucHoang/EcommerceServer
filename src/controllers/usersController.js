@@ -13,7 +13,7 @@ const accessTokenfc = (user) => {
             admin: user.admin,
         },
         process.env.ACCESS_KEY,
-        { expiresIn: '2h' },
+        { expiresIn: '3s' },
     );
 };
 const refreshTokenfc = (user) => {
@@ -60,7 +60,7 @@ module.exports = {
                 user.password = undefined;
                 const accessToken = accessTokenfc(user);
                 const refreshToken = refreshTokenfc(user);
-                refreshTokens.push(refreshToken);
+                const x = await User.updateOne({ _id: user._id }, { refreshToken });
                 res.cookie('refreshToken', refreshToken, {
                     httpOnly: 'true',
                     path: '/',
@@ -85,15 +85,16 @@ module.exports = {
     requestRefreshToken: async (req, res) => {
         const refreshToken = req.cookies.refreshToken;
         if (!refreshToken) return res.status(401).json("You're not authenticated ");
-        if (!refreshTokens.includes(refreshToken)) return res.status(403).json('Refresh token is not valid');
-        jwt.verify(refreshToken, process.env.REFRESH_KEY, (err, user) => {
+        if (!(await User.findOne({ refreshToken }))) return res.status(403).json('Refresh token is not valid');
+        jwt.verify(refreshToken, process.env.REFRESH_KEY, async (err, user) => {
             if (err) {
                 return res.status(500).json(err);
             }
             refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
             const newAccessToken = accessTokenfc(user);
             const newRefreshToken = refreshTokenfc(user);
-            refreshTokens.push(newRefreshToken);
+            // refreshTokens.push(newRefreshToken);
+            await User.updateOne({ refreshToken }, { refreshToken: newRefreshToken });
             res.cookie('refreshToken', newRefreshToken, {
                 httpOnly: 'true',
                 path: '/',
