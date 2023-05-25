@@ -60,7 +60,7 @@ module.exports = {
                 user.password = undefined;
                 const accessToken = accessTokenfc(user);
                 const refreshToken = refreshTokenfc(user);
-                const x = await User.updateOne({ _id: user._id }, { refreshToken });
+                await User.updateOne({ _id: user._id }, { refreshToken });
                 res.cookie('refreshToken', refreshToken, {
                     httpOnly: 'true',
                     path: '/',
@@ -90,11 +90,10 @@ module.exports = {
             if (err) {
                 return res.status(500).json(err);
             }
-            refreshTokens = refreshTokens.filter((token) => token !== refreshToken);
             const newAccessToken = accessTokenfc(user);
             const newRefreshToken = refreshTokenfc(user);
             // refreshTokens.push(newRefreshToken);
-            await User.updateOne({ refreshToken }, { refreshToken: newRefreshToken });
+            const x = await User.updateOne({ refreshToken }, { refreshToken: newRefreshToken });
             res.cookie('refreshToken', newRefreshToken, {
                 httpOnly: 'true',
                 path: '/',

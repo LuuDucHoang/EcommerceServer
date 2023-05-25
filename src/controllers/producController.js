@@ -38,8 +38,16 @@ module.exports = {
             if (size !== 0) {
                 const x = aqp(req.query);
                 delete x.filter.page;
-                const results = await Product.find({ name: { $regex: '.*' + x.filter.name + '.*' } }).limit(x.limit);
-                return res.send(results);
+                if (!x.filter.name) {
+                    return res.status(404).json('Nhập tên cần tìm');
+                }
+                const results = await Product.find({
+                    name: { $regex: '.*' + x.filter.name + '.*', $options: 'i' },
+                }).limit(x.limit);
+                return res.status(200).json({
+                    EC: 0,
+                    message: results,
+                });
             }
             if (size === 0) {
                 const results = await getProductListServices();
