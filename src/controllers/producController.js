@@ -85,7 +85,7 @@ module.exports = {
     getSmilarProduct: async (req, res) => {
         const type = req.params.type;
         try {
-            let randomPage = Math.floor(Math.random() * 3);
+            let randomPage = Math.floor(Math.random() * 4);
             if (randomPage === 0) {
                 randomPage++;
             }
