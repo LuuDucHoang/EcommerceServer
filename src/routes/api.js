@@ -1,5 +1,6 @@
 const express = require('express');
 const routerApi = express.Router();
+const Cart = require('../models/cart');
 const {
     postCreateProduct,
     getProductList,
@@ -13,6 +14,8 @@ const {
     requestRefreshToken,
     userLogout,
 } = require('../controllers/usersController');
+
+const { postCreateUpdateCart } = require('../controllers/cartController');
 const middlewareController = require('../controllers/middlewareController');
 //product
 routerApi.post('/product', middlewareController.verifyTokenAndAdmin, postCreateProduct);
@@ -27,4 +30,6 @@ routerApi.post('/users/signin', getUserSignIn);
 routerApi.post('/users/refreshtoken', requestRefreshToken);
 routerApi.post('/users/logout', middlewareController.verifyToken, userLogout);
 
+//cart
+routerApi.post('/cart/getcart', middlewareController.verifyToken, postCreateUpdateCart);
 module.exports = routerApi;
