@@ -28,4 +28,35 @@ module.exports = {
             return res.status(500).json(error);
         }
     },
+    putCartRemoveitemCart: async (req, res) => {
+        const { userId, remove } = req.body;
+        try {
+            const userCart = await Cart.findOne({ userId });
+            const newCart = userCart.cart.filter((e) => {
+                if (JSON.stringify(e) !== JSON.stringify(remove)) {
+                    return e;
+                }
+            });
+            const data = await Cart.updateOne({ userId }, { cart: newCart });
+            return res.status(200).json({
+                EC: 0,
+                data,
+            });
+        } catch (error) {
+            return res.status(500).json(error);
+        }
+    },
+    getCart: async (req, res) => {
+        const { userid } = req.params;
+        try {
+            const data = await Cart.findOne({ userId: userid });
+
+            return res.status(200).json({
+                EC: 0,
+                data,
+            });
+        } catch (error) {
+            return res.status(500).json(error);
+        }
+    },
 };

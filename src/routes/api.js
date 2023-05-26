@@ -15,7 +15,7 @@ const {
     userLogout,
 } = require('../controllers/usersController');
 
-const { postCreateUpdateCart } = require('../controllers/cartController');
+const { postCreateUpdateCart, putCartRemoveitemCart, getCart } = require('../controllers/cartController');
 const middlewareController = require('../controllers/middlewareController');
 //product
 routerApi.post('/product', middlewareController.verifyTokenAndAdmin, postCreateProduct);
@@ -31,5 +31,7 @@ routerApi.post('/users/refreshtoken', requestRefreshToken);
 routerApi.post('/users/logout', middlewareController.verifyToken, userLogout);
 
 //cart
-routerApi.post('/cart/getcart', middlewareController.verifyToken, postCreateUpdateCart);
+routerApi.get('/cart/getcart/:userid', middlewareController.verifyToken, getCart);
+routerApi.post('/cart', middlewareController.verifyToken, postCreateUpdateCart);
+routerApi.put('/cart/remove', middlewareController.verifyToken, putCartRemoveitemCart);
 module.exports = routerApi;
