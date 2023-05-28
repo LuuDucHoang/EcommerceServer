@@ -4,19 +4,39 @@ module.exports = {
     postCreateUpdateCart: async (req, res) => {
         const { userId, arr } = req.body;
         try {
+            let sumQuanlity;
+            let i;
             const test = await Cart.findOne({ userId });
             if (test) {
-                const newCart = [...test.cart, ...arr];
-                const data = await Cart.updateOne({ userId }, { cart: newCart });
-                return res.status(200).json({
-                    EC: 0,
-                    data,
+                test.cart.forEach((item, index) => {
+                    if (item.name === arr.name) {
+                        sumQuanlity = +item.quality + +arr.quality;
+                        i = index;
+                    }
                 });
+                console.log(sumQuanlity);
+                if (sumQuanlity) {
+                    test.cart[i].quality = sumQuanlity;
+                    const data = await Cart.updateOne({ userId }, { cart: test.cart });
+                    return res.status(200).json({
+                        EC: 0,
+                        data,
+                    });
+                }
+                if (!sumQuanlity) {
+                    const newCart = [...test.cart, arr];
+                    console.log(newCart);
+                    const data = await Cart.updateOne({ userId }, { cart: newCart });
+                    return res.status(200).json({
+                        EC: 0,
+                        data,
+                    });
+                }
             }
             if (!test) {
                 const cart = new Cart({
                     userId,
-                    cart: [...arr],
+                    cart: [arr],
                 });
                 const data = await cart.save();
                 return res.status(200).json({
@@ -37,7 +57,8 @@ module.exports = {
                     return e;
                 }
             });
-            const data = await Cart.updateOne({ userId }, { cart: newCart });
+            await Cart.updateOne({ userId }, { cart: newCart });
+            const data = await Cart.findOne({ userId });
             return res.status(200).json({
                 EC: 0,
                 data,
