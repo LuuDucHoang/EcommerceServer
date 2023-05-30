@@ -13,6 +13,8 @@ const {
     deleteUser,
     requestRefreshToken,
     userLogout,
+    updatteUserInfo,
+    getUserInfo,
 } = require('../controllers/usersController');
 
 const { postCreateUpdateCart, putCartRemoveitemCart, getCart } = require('../controllers/cartController');
@@ -29,6 +31,8 @@ routerApi.delete('/users/delete', middlewareController.verifyTokenAndAdmin, dele
 routerApi.post('/users/signin', getUserSignIn);
 routerApi.post('/users/refreshtoken', requestRefreshToken);
 routerApi.post('/users/logout', middlewareController.verifyToken, userLogout);
+routerApi.put('/users/update', middlewareController.verifyToken, updatteUserInfo);
+routerApi.get('/user/:id', middlewareController.verifyToken, getUserInfo);
 
 //cart
 routerApi.get('/cart/getcart/:userid', middlewareController.verifyToken, getCart);

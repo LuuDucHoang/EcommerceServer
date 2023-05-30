@@ -14,7 +14,6 @@ module.exports = {
                         i = index;
                     }
                 });
-                console.log(sumQuanlity);
                 if (sumQuanlity) {
                     test.cart[i].quality = sumQuanlity;
                     const data = await Cart.updateOne({ userId }, { cart: test.cart });
@@ -25,7 +24,6 @@ module.exports = {
                 }
                 if (!sumQuanlity) {
                     const newCart = [...test.cart, arr];
-                    console.log(newCart);
                     const data = await Cart.updateOne({ userId }, { cart: newCart });
                     return res.status(200).json({
                         EC: 0,

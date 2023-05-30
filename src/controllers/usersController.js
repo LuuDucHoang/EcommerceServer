@@ -103,8 +103,44 @@ module.exports = {
         });
     },
     userLogout: async (req, res) => {
-        res.clearCookie('refreshToken');
+        res.clearCookies('refreshToken');
         refreshTokens = refreshTokens.filter((token) => token !== req.cookies.refreshToken);
         return res.status(200).json('Log out!');
+    },
+    updatteUserInfo: async (req, res) => {
+        const { id, ...rest } = req.body;
+        try {
+            delete rest.data.refreshToken;
+            const data = await User.updateOne({ _id: id }, { ...rest.data });
+            return res.status(200).json({
+                EC: 0,
+                data,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                EC: -1,
+                error,
+            });
+        }
+    },
+    getUserInfo: async (req, res) => {
+        const _id = req.params.id;
+        try {
+            let data = await User.findOne({ _id });
+            if (data) {
+                const coppy = Object.assign({}, data);
+                delete coppy._doc.password;
+            }
+            return res.status(200).json({
+                EC: 0,
+                data,
+            });
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                EC: -1,
+                error,
+            });
+        }
     },
 };
