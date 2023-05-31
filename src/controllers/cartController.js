@@ -78,4 +78,21 @@ module.exports = {
             return res.status(500).json(error);
         }
     },
+    clearUserCart: async (req, res) => {
+        const { userid } = req.params;
+
+        try {
+            const data = await Cart.deleteOne({ userId: userid });
+            return res.status(200).json({
+                EC: 0,
+                data,
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                EC: -1,
+                error,
+            });
+        }
+    },
 };
