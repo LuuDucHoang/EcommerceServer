@@ -3,10 +3,18 @@ const userOrder = require('../models/userOrder');
 
 module.exports = {
     postNewUserOrder: async (req, res) => {
-        const { userId, userName, address, phone, orders } = req.body;
+        const { userId, userName, address, phone, finalPrice, adminConfirm = false, orders } = req.body;
         try {
-            const uOrder = new userOrder({ userId, userName, address, phone, orders: orders });
-            const data = await uOrder.save();
+            const data = await userOrder.create({
+                userId,
+                userName,
+                address,
+                phone,
+                finalPrice,
+                adminConfirm,
+                orders: orders,
+            });
+            // const data = await uOrder.save();
             return res.status(200).json({
                 EC: 0,
                 data,
@@ -19,7 +27,20 @@ module.exports = {
             });
         }
     },
-    // getUserOrders:async(req,res)=>{
-    //     const userId =
-    // }
+    getUserOrders: async (req, res) => {
+        const { userId } = req.params;
+        try {
+            const data = await userOrder.find({ userId });
+            return res.status(200).json({
+                EC: 0,
+                data,
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                EC: -1,
+                error,
+            });
+        }
+    },
 };
