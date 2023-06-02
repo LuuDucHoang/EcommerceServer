@@ -10,8 +10,8 @@ module.exports = {
             if (test) {
                 test.cart.forEach((item, index) => {
                     if (item.name === arr.name) {
-                        sumQuanlity = +item.quality + +arr.quality;
-                        i = index;
+                        sumQuanlity.push(+item.quality + +arr.quality);
+                        i.push(index);
                     }
                 });
                 if (sumQuanlity) {
@@ -23,24 +23,47 @@ module.exports = {
                     });
                 }
                 if (!sumQuanlity) {
-                    const newCart = [...test.cart, arr];
-                    const data = await Cart.updateOne({ userId }, { cart: newCart });
+                    if (typeof arr === 'object' && !Array.isArray(arr)) {
+                        const newCart = [...test.cart, arr];
+                        const data = await Cart.updateOne({ userId }, { cart: newCart });
+                        return res.status(200).json({
+                            EC: 0,
+                            data,
+                        });
+                    }
+                    if (Array.isArray(arr) === true) {
+                        const newCart = [...test.cart, ...arr];
+                        const data = await Cart.updateOne({ userId }, { cart: newCart });
+                        return res.status(200).json({
+                            EC: 0,
+                            data,
+                        });
+                    }
+                }
+            }
+            if (!test) {
+                if (typeof arr === 'object' && !Array.isArray(arr)) {
+                    const cart = new Cart({
+                        userId,
+                        cart: [arr],
+                    });
+                    const data = await cart.save();
                     return res.status(200).json({
                         EC: 0,
                         data,
                     });
                 }
-            }
-            if (!test) {
-                const cart = new Cart({
-                    userId,
-                    cart: [arr],
-                });
-                const data = await cart.save();
-                return res.status(200).json({
-                    EC: 0,
-                    data,
-                });
+                if (Array.isArray(arr)) {
+                    const cart = new Cart({
+                        userId,
+                        cart: arr,
+                    });
+                    const data = await cart.save();
+                    return res.status(200).json({
+                        EC: 0,
+                        data,
+                    });
+                }
             }
         } catch (error) {
             return res.status(500).json(error);
