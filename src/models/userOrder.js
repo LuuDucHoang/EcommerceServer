@@ -8,6 +8,7 @@ const userOrderSchema = new mongoose.Schema(
         phone: { type: String, require: true },
         finalPrice: { type: Number, require: true },
         adminConfirm: { type: Boolean },
+        cancel: { type: Boolean },
         orders: {
             type: [Object],
             require: true,

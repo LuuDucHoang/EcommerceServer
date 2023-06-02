@@ -62,6 +62,7 @@ module.exports = {
                 const refreshToken = refreshTokenfc(user);
                 await User.updateOne({ _id: user._id }, { refreshToken });
                 res.cookie('refreshToken', refreshToken, {
+                    expire: false,
                     httpOnly: 'true',
                     path: '/',
                     sameSite: 'strict',

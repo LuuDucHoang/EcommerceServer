@@ -22,7 +22,13 @@ const {
     getCart,
     clearUserCart,
 } = require('../controllers/cartController');
-const { postNewUserOrder, getUserOrders, getDetailUserOrders } = require('../controllers/userOrderController');
+const {
+    postNewUserOrder,
+    getUserOrders,
+    getDetailUserOrders,
+    cancelUserOrders,
+    getNotConfirmUserOrders,
+} = require('../controllers/userOrderController');
 const middlewareController = require('../controllers/middlewareController');
 //product
 routerApi.post('/product', middlewareController.verifyTokenAndAdmin, postCreateProduct);
@@ -49,5 +55,7 @@ routerApi.delete('/clearcart/:userid', middlewareController.verifyToken, clearUs
 routerApi.post('/userorder', middlewareController.verifyToken, postNewUserOrder);
 routerApi.get('/userorder/:userId', middlewareController.verifyToken, getUserOrders);
 routerApi.get('/userorder/detail/:id', middlewareController.verifyToken, getDetailUserOrders);
+routerApi.get('/userorder/notconfirm/:userId', middlewareController.verifyToken, getNotConfirmUserOrders);
+routerApi.delete('/userorder/cancel/:id', middlewareController.verifyToken, cancelUserOrders);
 //export
 module.exports = routerApi;
