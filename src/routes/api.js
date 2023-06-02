@@ -27,6 +27,7 @@ const {
     getUserOrders,
     getDetailUserOrders,
     cancelUserOrders,
+    getConfirmUserOrders,
     getNotConfirmUserOrders,
 } = require('../controllers/userOrderController');
 const middlewareController = require('../controllers/middlewareController');
@@ -56,6 +57,8 @@ routerApi.post('/userorder', middlewareController.verifyToken, postNewUserOrder)
 routerApi.get('/userorder/:userId', middlewareController.verifyToken, getUserOrders);
 routerApi.get('/userorder/detail/:id', middlewareController.verifyToken, getDetailUserOrders);
 routerApi.get('/userorder/notconfirm/:userId', middlewareController.verifyToken, getNotConfirmUserOrders);
+routerApi.get('/userorder/confirm/:userId', middlewareController.verifyToken, getConfirmUserOrders);
 routerApi.delete('/userorder/cancel/:id', middlewareController.verifyToken, cancelUserOrders);
+
 //export
 module.exports = routerApi;

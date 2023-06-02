@@ -90,4 +90,20 @@ module.exports = {
             });
         }
     },
+    getConfirmUserOrders: async (req, res) => {
+        const { userId } = req.params;
+        try {
+            const data = await userOrder.find({ userId, adminConfirm: true });
+            return res.status(200).json({
+                EC: 0,
+                data,
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                EC: -1,
+                error,
+            });
+        }
+    },
 };
