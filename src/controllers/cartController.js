@@ -6,14 +6,32 @@ module.exports = {
         try {
             let sumQuanlity;
             let i;
+            let sumArr = [];
+            let indexArr = [];
+
             const test = await Cart.findOne({ userId });
+
             if (test) {
-                test.cart.forEach((item, index) => {
-                    if (item.name === arr.name) {
-                        sumQuanlity.push(+item.quality + +arr.quality);
-                        i.push(index);
-                    }
-                });
+                if (typeof arr === 'object' && !Array.isArray(arr)) {
+                    test.cart.forEach((item, index) => {
+                        if (item.name === arr.name) {
+                            sumQuanlity = +item.quality + +arr.quality;
+                            i = index;
+                        }
+                    });
+                }
+
+                if (Array.isArray(arr)) {
+                    test.cart.forEach((item, index) => {
+                        arr.forEach((x, key) => {
+                            if (x.name == item.name) {
+                                sumArr = [...sumArr, item.quality + x.quality];
+                                indexArr = [...indexArr, index];
+                            }
+                        });
+                    });
+                }
+
                 if (sumQuanlity) {
                     test.cart[i].quality = sumQuanlity;
                     const data = await Cart.updateOne({ userId }, { cart: test.cart });
@@ -22,7 +40,17 @@ module.exports = {
                         data,
                     });
                 }
-                if (!sumQuanlity) {
+                if (sumArr.length !== 0) {
+                    indexArr.forEach((item, key) => {
+                        test.cart[item].quality = sumArr[key];
+                    });
+                    const data = await Cart.updateOne({ userId }, { cart: test.cart });
+                    return res.status(200).json({
+                        EC: 0,
+                        data,
+                    });
+                }
+                if (!sumQuanlity || !sumArr) {
                     if (typeof arr === 'object' && !Array.isArray(arr)) {
                         const newCart = [...test.cart, arr];
                         const data = await Cart.updateOne({ userId }, { cart: newCart });
@@ -45,7 +73,7 @@ module.exports = {
                 if (typeof arr === 'object' && !Array.isArray(arr)) {
                     const cart = new Cart({
                         userId,
-                        cart: [arr],
+                        cart: arr,
                     });
                     const data = await cart.save();
                     return res.status(200).json({
