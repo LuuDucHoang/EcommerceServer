@@ -14,11 +14,16 @@ app.use(express.json()); // Used to parse JSON bodies
 app.use(express.urlencoded()); //Parse URL-encoded bodies
 
 // config file upload
-app.use(cookieParser());
-app.use(cors({ origin: process.env.HOS_FETCH }));
 app.use(fileUpload());
+// config cors
+app.use(cors({ origin: process.env.HOS_FETCH }));
+// cookieParser
+app.use(cookieParser());
+// router api
 app.use('/api', routerApi);
+// static files
 
+app.use(express.static('./src/public/images'));
 (async () => {
     try {
         await connection();

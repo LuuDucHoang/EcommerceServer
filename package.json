@@ -1,6 +1,12 @@
 {
     "name": "my-sever",
     "version": "1.0.0",
+    "proxy": {
+        "/upload": {
+            "target": "http://localhost:3000",
+            "secure": false
+        }
+    },
     "description": "",
     "main": "index.js",
     "scripts": {

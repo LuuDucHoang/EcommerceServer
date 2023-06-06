@@ -1,12 +1,30 @@
 const { postCreateProductService, getProductListServices } = require('../services/productService');
+const { uploadSingleFile } = require('../services/fileService');
+
 const aqp = require('api-query-params');
 const Product = require('../models/product');
 module.exports = {
     postCreateProduct: async (req, res) => {
-        const { name, price, status, type } = req.body;
+        const { name, price, status, brand, size, image, type, description } = req.body;
         let message;
-        if (price < 0) {
-            message = 'Giá không được âm';
+        console.log(req.files);
+        console.log(req.body);
+        if (!req.files || Object.keys(req.files).length === 0) {
+            message = 'Không có files được chọn';
+            return res.status(400).json({
+                EC: -1,
+                message,
+            });
+        }
+        if (!name) {
+            message = 'Vui lòng nhập tên sản phẩm';
+            return res.status(400).json({
+                EC: -1,
+                message,
+            });
+        }
+        if (price < 0 || !price || isNaN(price)) {
+            message = 'Giá sản phẩm không hợp lệ';
             return res.status(400).json({
                 EC: -1,
                 message,
@@ -19,20 +37,33 @@ module.exports = {
                 message,
             });
         }
+
+        if (!size || isNaN(size)) {
+            message = 'Size không hợp lệ';
+            return res.status(400).json({
+                EC: -1,
+                message,
+            });
+        }
         try {
             const test = await Product.find({ name });
-            if (test.length != 0) {
+            if (test.length !== 0) {
                 return res.status(400).json({
                     EC: -1,
                     message: 'Đã tồn tại mặt hàng',
                 });
             }
-            const results = await Product.create({ ...req.body });
+            const imgLink = await uploadSingleFile(req.files.image);
+            imageUrl = `http://${process.env.HOST_NAME}:${process.env.PORT}/upload/${imgLink.path}`;
+            let data = { name, price, status, brand, size, image, type, description, image: imageUrl };
+
+            const results = await Product.create({ ...data });
             return res.status(200).json({
                 message: null,
                 results,
             });
         } catch (error) {
+            console.log(error);
             return res.status(500).json({
                 EC: -1,
                 message: error,
