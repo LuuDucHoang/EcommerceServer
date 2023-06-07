@@ -7,8 +7,6 @@ module.exports = {
     postCreateProduct: async (req, res) => {
         const { name, price, status, brand, size, image, type, description } = req.body;
         let message;
-        console.log(req.files);
-        console.log(req.body);
         if (!req.files || Object.keys(req.files).length === 0) {
             message = 'Không có files được chọn';
             return res.status(400).json({
@@ -126,6 +124,20 @@ module.exports = {
             return res.status(200).json({
                 EC: 0,
                 data: results,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                EC: -1,
+                message: error,
+            });
+        }
+    },
+    getAllProduct: async (req, res) => {
+        try {
+            const data = await Product.find({});
+            return res.status(200).json({
+                EC: 0,
+                data,
             });
         } catch (error) {
             return res.status(500).json({

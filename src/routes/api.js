@@ -5,6 +5,7 @@ const {
     getProductList,
     getDetailProduct,
     getSmilarProduct,
+    getAllProduct,
 } = require('../controllers/producController');
 const {
     postCreateUser,
@@ -37,6 +38,7 @@ routerApi.post('/product', middlewareController.verifyTokenAndAdmin, postCreateP
 routerApi.get('/product', getProductList);
 routerApi.get('/product/:id', getDetailProduct);
 routerApi.get('/smilar/:type', getSmilarProduct);
+routerApi.get('/products/all', getAllProduct);
 
 //user
 routerApi.post('/users/register', postCreateUser);
