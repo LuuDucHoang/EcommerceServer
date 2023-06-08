@@ -133,11 +133,16 @@ module.exports = {
         }
     },
     getAllProduct: async (req, res) => {
+        const { page, limit } = req.query;
         try {
             const data = await Product.find({});
+            const firstPageIndex = (page - 1) * +limit;
+            const lastPageIndex = firstPageIndex + +limit;
+            const x = data.slice(firstPageIndex, lastPageIndex);
             return res.status(200).json({
                 EC: 0,
-                data,
+                total: data.length,
+                data: x,
             });
         } catch (error) {
             return res.status(500).json({
