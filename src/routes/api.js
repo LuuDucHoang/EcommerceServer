@@ -7,6 +7,10 @@ const {
     getSmilarProduct,
     getAllProduct,
     updateProduct,
+    deleteProduct,
+    restoreAndUpdateProduct,
+    getDeletedProduct,
+    removeDeletedProduct,
 } = require('../controllers/producController');
 const {
     postCreateUser,
@@ -41,6 +45,10 @@ routerApi.get('/product/:id', getDetailProduct);
 routerApi.get('/smilar/:type', getSmilarProduct);
 routerApi.get('/products/all', getAllProduct);
 routerApi.put('/product/update/:id', middlewareController.verifyTokenAndAdmin, updateProduct);
+routerApi.delete('/product/delete/:id', middlewareController.verifyTokenAndAdmin, deleteProduct);
+routerApi.get('/product/get/deleted', middlewareController.verifyTokenAndAdmin, getDeletedProduct);
+routerApi.put('/product/restore/update/:id', restoreAndUpdateProduct);
+routerApi.delete('/product/remove/:id', removeDeletedProduct);
 //user
 routerApi.post('/users/register', postCreateUser);
 routerApi.delete('/users/delete', middlewareController.verifyTokenAndAdmin, deleteUser);

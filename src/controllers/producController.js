@@ -237,4 +237,164 @@ module.exports = {
             });
         }
     },
+    deleteProduct: async (req, res) => {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(500).json({
+                EC: -1,
+                message: 'Vui lòng nhập id',
+            });
+        }
+        try {
+            const test = await Product.findById({ _id: id });
+            if (!test) {
+                return res.status(500).json({
+                    EC: -1,
+                    message: 'không tìm thấy sản phẩm cần xóa',
+                });
+            }
+
+            const data = await Product.deleteById({ _id: id });
+            return res.status(200).json({
+                EC: 0,
+                data,
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                EC: -1,
+                error,
+            });
+        }
+    },
+    getDeletedProduct: async (req, res) => {
+        const { page, limit } = req.query;
+        try {
+            const data = await Product.findDeleted({});
+            const firstPageIndex = (page - 1) * +limit;
+            const lastPageIndex = firstPageIndex + +limit;
+            const x = data.slice(firstPageIndex, lastPageIndex);
+            return res.status(200).json({
+                EC: 0,
+                total: data.length,
+                data: x,
+            });
+        } catch (error) {
+            return res.status(500).json({
+                EC: -1,
+                message: error,
+            });
+        }
+    },
+    restoreAndUpdateProduct: async (req, res) => {
+        const { name, price, status, brand, size, image, type, description } = req.body;
+        const { id } = req.params;
+        let message;
+        if (!id) {
+            message = 'Vui lòng nhập id của sản phẩm';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+        if (!name) {
+            message = 'Vui lòng nhập tên sản phẩm';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+        if (price < 0 || !price || isNaN(price)) {
+            message = 'Giá sản phẩm không hợp lệ';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+        if (!type) {
+            message = 'Vui lòng nhập loại hàng';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+
+        if (!size || isNaN(size)) {
+            message = 'Size không hợp lệ';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+        try {
+            const test = await Product.findDeleted({ _id: id });
+            let data;
+            if (!test.length) {
+                return res.status(500).json({
+                    EC: -1,
+                    message: 'Không tìm thấy sản phẩm cần khôi phục',
+                });
+            }
+            if (req.files) {
+                const arrayOfAllowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+                if (!arrayOfAllowedFileTypes.includes(req.files.mimetype)) {
+                    return res.status(500).json({
+                        EC: -1,
+                        message: 'Files không hợp lệ',
+                    });
+                }
+                const imgLink = await uploadSingleFile(req.files.image);
+                imageUrl = `http://${process.env.HOST_NAME}:${process.env.PORT}/upload/${imgLink.path}`;
+                data = { name, price, status, brand, size, image, type, description, image: imageUrl };
+            }
+            if (!req.files) {
+                data = {
+                    name,
+                    price,
+                    status,
+                    brand,
+                    size,
+                    type,
+                    description,
+                };
+            }
+
+            const results = await Product.updateOneDeleted({ _id: id }, { ...data, deleted: false }, { upsert: true });
+            return res.status(200).json({
+                message: null,
+                results,
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                EC: -1,
+                message: error,
+            });
+        }
+    },
+    removeDeletedProduct: async (req, res) => {
+        const { id } = req.params;
+        console.log(id);
+        try {
+            const test = await Product.findOneDeleted({ _id: id });
+            if (!test) {
+                return res.status(500).json({
+                    EC: -1,
+                    message: 'Không tìm thấy sản phẩm cần loại bỏ',
+                });
+            }
+            const data = await Product.deleteOne({ _id: id });
+            return res.status(200).json({
+                EC: 0,
+                data,
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
+                EC: -1,
+                error,
+            });
+        }
+    },
 };
