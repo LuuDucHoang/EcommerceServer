@@ -48,7 +48,7 @@ routerApi.put('/product/update/:id', middlewareController.verifyTokenAndAdmin, u
 routerApi.delete('/product/delete/:id', middlewareController.verifyTokenAndAdmin, deleteProduct);
 routerApi.get('/product/get/deleted', middlewareController.verifyTokenAndAdmin, getDeletedProduct);
 routerApi.put('/product/restore/update/:id', restoreAndUpdateProduct);
-routerApi.delete('/product/remove/:id', removeDeletedProduct);
+routerApi.delete('/product/remove/:id', middlewareController.verifyTokenAndAdmin, removeDeletedProduct);
 //user
 routerApi.post('/users/register', postCreateUser);
 routerApi.delete('/users/delete', middlewareController.verifyTokenAndAdmin, deleteUser);
