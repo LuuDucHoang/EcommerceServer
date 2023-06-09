@@ -9,28 +9,28 @@ module.exports = {
         let message;
         if (!req.files || Object.keys(req.files).length === 0) {
             message = 'Không có files được chọn';
-            return res.status(400).json({
+            return res.status(500).json({
                 EC: -1,
                 message,
             });
         }
         if (!name) {
             message = 'Vui lòng nhập tên sản phẩm';
-            return res.status(400).json({
+            return res.status(500).json({
                 EC: -1,
                 message,
             });
         }
         if (price < 0 || !price || isNaN(price)) {
             message = 'Giá sản phẩm không hợp lệ';
-            return res.status(400).json({
+            return res.status(500).json({
                 EC: -1,
                 message,
             });
         }
         if (!type) {
             message = 'Vui lòng nhập loại hàng';
-            return res.status(400).json({
+            return res.status(500).json({
                 EC: -1,
                 message,
             });
@@ -38,7 +38,7 @@ module.exports = {
 
         if (!size || isNaN(size)) {
             message = 'Size không hợp lệ';
-            return res.status(400).json({
+            return res.status(500).json({
                 EC: -1,
                 message,
             });
@@ -46,7 +46,7 @@ module.exports = {
         try {
             const test = await Product.find({ name });
             if (test.length !== 0) {
-                return res.status(400).json({
+                return res.status(500).json({
                     EC: -1,
                     message: 'Đã tồn tại mặt hàng',
                 });
@@ -145,6 +145,92 @@ module.exports = {
                 data: x,
             });
         } catch (error) {
+            return res.status(500).json({
+                EC: -1,
+                message: error,
+            });
+        }
+    },
+    updateProduct: async (req, res) => {
+        const { name, price, status, brand, size, image, type, description } = req.body;
+        const { id } = req.params;
+        let message;
+        if (!id) {
+            message = 'Vui lòng nhập id của sản phẩm';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+        if (!name) {
+            message = 'Vui lòng nhập tên sản phẩm';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+        if (price < 0 || !price || isNaN(price)) {
+            message = 'Giá sản phẩm không hợp lệ';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+        if (!type) {
+            message = 'Vui lòng nhập loại hàng';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+
+        if (!size || isNaN(size)) {
+            message = 'Size không hợp lệ';
+            return res.status(500).json({
+                EC: -1,
+                message,
+            });
+        }
+        try {
+            const test = await Product.find({ _id: id });
+            let data;
+            if (!test.length) {
+                return res.status(500).json({
+                    EC: -1,
+                    message: 'Không tìm thấy sản phẩm cần cập nhật',
+                });
+            }
+            if (req.files) {
+                const arrayOfAllowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+                if (!arrayOfAllowedFileTypes.includes(req.files.mimetype)) {
+                    return res.status(500).json({
+                        EC: -1,
+                        message: 'Files không hợp lệ',
+                    });
+                }
+                const imgLink = await uploadSingleFile(req.files.image);
+                imageUrl = `http://${process.env.HOST_NAME}:${process.env.PORT}/upload/${imgLink.path}`;
+                data = { name, price, status, brand, size, image, type, description, image: imageUrl };
+            }
+            if (!req.files) {
+                data = {
+                    name,
+                    price,
+                    status,
+                    brand,
+                    size,
+                    type,
+                    description,
+                };
+            }
+
+            const results = await Product.updateOne({ _id: id }, { ...data }, { upsert: true });
+            return res.status(200).json({
+                message: null,
+                results,
+            });
+        } catch (error) {
+            console.log(error);
             return res.status(500).json({
                 EC: -1,
                 message: error,
