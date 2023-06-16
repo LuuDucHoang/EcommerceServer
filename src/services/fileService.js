@@ -1,4 +1,17 @@
 const path = require('path');
+const config = require('../config/firebase.config');
+const { initializeApp } = require('firebase/app');
+const { getStorage, ref, getDownloadURL, uploadBytesResumable } = require('firebase/storage');
+const giveCurrentDateTime = () => {
+    const today = new Date();
+    const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+    const time = today.getHours() + ':' + today.getMinutes() + ':' + today.getSeconds();
+    const dateTime = date + ' ' + time;
+    return dateTime;
+};
+
+initializeApp(config.firebaseConfig);
+const storage = getStorage();
 const uploadSingleFile = async (file) => {
     const uploadPath = path.resolve(__dirname, '../public/images/upload');
     let extName = path.extname(file.name);
@@ -60,8 +73,38 @@ const uploadMultipleFiles = async (files) => {
         console.log(error);
     }
 };
+const uploadFIleToFireBase = async (file) => {
+    try {
+        const dateTime = giveCurrentDateTime();
 
+        const storageRef = ref(storage, `files/${file.originalname + '       ' + dateTime}`);
+
+        const metadata = {
+            contentType: file.mimetype,
+        };
+
+        const snapshot = await uploadBytesResumable(storageRef, file.buffer, metadata);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        console.log(downloadURL);
+        console.log('File successfully uploaded.');
+        return {
+            name: file.name,
+            status: 'succes',
+            path: downloadURL,
+            err: null,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            name: file.name,
+            status: 'fail',
+            path: null,
+            error,
+        };
+    }
+};
 module.exports = {
     uploadSingleFile,
     uploadMultipleFiles,
+    uploadFIleToFireBase,
 };

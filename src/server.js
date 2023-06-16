@@ -1,5 +1,7 @@
 require('dotenv').config();
 const cors = require('cors');
+const bodyParser = require('body-parser');
+
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
@@ -11,10 +13,15 @@ const hostName = process.env.HOST_NAME;
 
 //config get input
 app.use(express.json()); // Used to parse JSON bodies
-app.use(express.urlencoded()); //Parse URL-encoded bodies
-
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(
+    bodyParser.urlencoded({
+        extended: false,
+    }),
+);
 // config file upload
-app.use(fileUpload());
+// app.use(fileUpload());
 // config cors
 app.use(cors({ origin: process.env.HOS_FETCH }));
 // cookieParser

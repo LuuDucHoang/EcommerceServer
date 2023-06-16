@@ -1,4 +1,7 @@
 const express = require('express');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+
 const routerApi = express.Router();
 const {
     postCreateProduct,
@@ -11,6 +14,7 @@ const {
     restoreAndUpdateProduct,
     getDeletedProduct,
     removeDeletedProduct,
+    test,
 } = require('../controllers/producController');
 const {
     postCreateUser,
@@ -37,17 +41,24 @@ const {
     getNotConfirmUserOrders,
     getCancelUserOrders,
 } = require('../controllers/userOrderController');
+const { uploadFIleToFireBase } = require('../services/fileService');
 const middlewareController = require('../controllers/middlewareController');
+
 //product
-routerApi.post('/product', middlewareController.verifyTokenAndAdmin, postCreateProduct);
+routerApi.post('/product', upload.single('image'), postCreateProduct);
 routerApi.get('/product', getProductList);
 routerApi.get('/product/:id', getDetailProduct);
 routerApi.get('/smilar/:type', getSmilarProduct);
 routerApi.get('/products/all', getAllProduct);
-routerApi.put('/product/update/:id', middlewareController.verifyTokenAndAdmin, updateProduct);
+routerApi.put('/product/update/:id', middlewareController.verifyTokenAndAdmin, upload.single('image'), updateProduct);
 routerApi.delete('/product/delete/:id', middlewareController.verifyTokenAndAdmin, deleteProduct);
 routerApi.get('/product/get/deleted', middlewareController.verifyTokenAndAdmin, getDeletedProduct);
-routerApi.put('/product/restore/update/:id', restoreAndUpdateProduct);
+routerApi.put(
+    '/product/restore/update/:id',
+    middlewareController.verifyTokenAndAdmin,
+    upload.single('image'),
+    restoreAndUpdateProduct,
+);
 routerApi.delete('/product/remove/:id', middlewareController.verifyTokenAndAdmin, removeDeletedProduct);
 //user
 routerApi.post('/users/register', postCreateUser);

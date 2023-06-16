@@ -1,17 +1,23 @@
-const { postCreateProductService, getProductListServices } = require('../services/productService');
-const { uploadSingleFile } = require('../services/fileService');
-
+const { getProductListServices } = require('../services/productService');
+const { uploadSingleFile, uploadFIleToFireBase } = require('../services/fileService');
 const aqp = require('api-query-params');
 const Product = require('../models/product');
 module.exports = {
     postCreateProduct: async (req, res) => {
         const { name, price, status, brand, size, image, type, description } = req.body;
         let message;
-        if (!req.files || Object.keys(req.files).length === 0) {
+        if (!req.file) {
             message = 'Không có files được chọn';
             return res.status(500).json({
                 EC: -1,
                 message,
+            });
+        }
+        const arrayOfAllowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+        if (!arrayOfAllowedFileTypes.includes(req.file.mimetype)) {
+            return res.status(500).json({
+                EC: -1,
+                message: 'Files không hợp lệ',
             });
         }
         if (!name) {
@@ -51,10 +57,14 @@ module.exports = {
                     message: 'Đã tồn tại mặt hàng',
                 });
             }
-            const imgLink = await uploadSingleFile(req.files.image);
-            imageUrl = `http://${process.env.HOST_NAME}:${process.env.PORT}/upload/${imgLink.path}`;
-            let data = { name, price, status, brand, size, image, type, description, image: imageUrl };
-
+            const imgLink = await uploadFIleToFireBase(req.file);
+            if (!imgLink.path) {
+                return res.status(500).json({
+                    EC: -1,
+                    message: 'Upload file thất bại',
+                });
+            }
+            let data = { name, price, status, brand, size, image, type, description, image: imgLink.path };
             const results = await Product.create({ ...data });
             return res.status(200).json({
                 message: null,
@@ -200,19 +210,19 @@ module.exports = {
                     message: 'Không tìm thấy sản phẩm cần cập nhật',
                 });
             }
-            if (req.files) {
+            if (req.file) {
                 const arrayOfAllowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
-                if (!arrayOfAllowedFileTypes.includes(req.files.mimetype)) {
+                if (!arrayOfAllowedFileTypes.includes(req.file.mimetype)) {
                     return res.status(500).json({
                         EC: -1,
                         message: 'Files không hợp lệ',
                     });
                 }
-                const imgLink = await uploadSingleFile(req.files.image);
-                imageUrl = `http://${process.env.HOST_NAME}:${process.env.PORT}/upload/${imgLink.path}`;
-                data = { name, price, status, brand, size, image, type, description, image: imageUrl };
+                const imgLink = await uploadFIleToFireBase(req.file);
+
+                data = { name, price, status, brand, size, image, type, description, image: imgLink.path };
             }
-            if (!req.files) {
+            if (!req.file) {
                 data = {
                     name,
                     price,
@@ -336,19 +346,19 @@ module.exports = {
                     message: 'Không tìm thấy sản phẩm cần khôi phục',
                 });
             }
-            if (req.files) {
+            if (req.file) {
                 const arrayOfAllowedFileTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
-                if (!arrayOfAllowedFileTypes.includes(req.files.mimetype)) {
+                if (!arrayOfAllowedFileTypes.includes(req.file.mimetype)) {
                     return res.status(500).json({
                         EC: -1,
                         message: 'Files không hợp lệ',
                     });
                 }
-                const imgLink = await uploadSingleFile(req.files.image);
-                imageUrl = `http://${process.env.HOST_NAME}:${process.env.PORT}/upload/${imgLink.path}`;
-                data = { name, price, status, brand, size, image, type, description, image: imageUrl };
+                const imgLink = await uploadFIleToFireBase(req.file);
+
+                data = { name, price, status, brand, size, image, type, description, image: imgLink.path };
             }
-            if (!req.files) {
+            if (!req.file) {
                 data = {
                     name,
                     price,
@@ -393,6 +403,19 @@ module.exports = {
             console.log(error);
             return res.status(500).json({
                 EC: -1,
+                error,
+            });
+        }
+    },
+    test: async (req, res) => {
+        try {
+            const results = await uploadFIleToFireBase(req.file);
+            return res.status(200).json({
+                results,
+            });
+        } catch (error) {
+            console.log(error);
+            return res.status(500).json({
                 error,
             });
         }
